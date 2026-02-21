@@ -1539,6 +1539,13 @@ def main():
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('cancel', cancel))
 
+    # Обработчики рейтинга
+    application.add_handler(CallbackQueryHandler(leaderboard_by_count, pattern='^lb_count$'))
+    application.add_handler(CallbackQueryHandler(leaderboard_by_time, pattern='^lb_time$'))
+    application.add_handler(CallbackQueryHandler(leaderboard_by_month, pattern='^lb_month$'))
+    application.add_handler(CallbackQueryHandler(leaderboard_back, pattern='^lb_back$'))
+    application.add_handler(CallbackQueryHandler(leaderboard_close, pattern='^lb_close$'))
+
     # ВАЖНО: ВСЕ Callback handlers ДОЛЖНЫ быть ДО ConversationHandler
     application.add_handler(CallbackQueryHandler(end_active_workout_handler, pattern='^end_active_now$'))
     application.add_handler(CallbackQueryHandler(cancel_active_handler, pattern='^cancel_active$'))
@@ -1551,12 +1558,6 @@ def main():
     application.add_handler(CallbackQueryHandler(back_to_history_handler, pattern='^back_history$'))
     application.add_handler(CallbackQueryHandler(handle_delete_type, pattern='^(hide_|deltype_)'))
     application.add_handler(CallbackQueryHandler(handle_unhide_type, pattern='^unhide_'))
-    # Обработчики рейтинга
-    application.add_handler(CallbackQueryHandler(leaderboard_by_count, pattern='^lb_count$'))
-    application.add_handler(CallbackQueryHandler(leaderboard_by_time, pattern='^lb_time$'))
-    application.add_handler(CallbackQueryHandler(leaderboard_by_month, pattern='^lb_month$'))
-    application.add_handler(CallbackQueryHandler(leaderboard_back, pattern='^lb_back$'))
-    application.add_handler(CallbackQueryHandler(leaderboard_close, pattern='^lb_close$'))
 
     # Conversation handlers
     workout_conv = ConversationHandler(
@@ -1632,8 +1633,8 @@ def main():
 
     # Message handlers для меню
     application.add_handler(MessageHandler(filters.Regex('^📊 Статистика$'), stats))
-    application.add_handler(MessageHandler(filters.Regex('^🏆 Рейтинг$'), leaderboard))
     application.add_handler(MessageHandler(filters.Regex('^📋 История$'), history))
+    application.add_handler(MessageHandler(filters.Regex('^🏆 Рейтинг$'), leaderboard))
     application.add_handler(MessageHandler(filters.Regex('^📝 Мои типы$'), my_types))
     application.add_handler(MessageHandler(filters.Regex('^🗑 Удалить/Скрыть тип$'), remove_type_menu))
     application.add_handler(MessageHandler(filters.Regex('^👁 Показать скрытые$'), show_hidden_types))
@@ -1649,10 +1650,12 @@ def main():
     application.add_handler(MessageHandler(filters.TEXT, handle_main_menu))
 
     print('🚀 Бот запущен!')
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    
+    # ИЗМЕНЕНО: используем run_polling без async
+    application.run_polling(drop_pending_updates=True)
 
 
 if __name__ == '__main__':
-
     main()
+
 
